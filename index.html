@@ -124,29 +124,19 @@ function updateUI(){
  $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,initialMax)*100))+"%";
  $("undoBtn").disabled=!history.length;
 }
-async function showPair(){
+function showPair(){
  if(!current)return;
- const token=current;
  const li=left.querySelector("img"),ri=right.querySelector("img");
- left.style.visibility="hidden";
- right.style.visibility="hidden";
+ // 全画像はゲーム開始前に読み込み・デコード済み。
+ // 比較中は visibility を触らず、左右を同期的に差し替える。
  li.src=path(current.a);
  ri.src=path(current.b);
+ li.alt=current.a.name;
+ ri.alt=current.b.name;
  left.querySelector(".name").textContent=current.a.name;
  right.querySelector(".name").textContent=current.b.name;
- try{
-  await Promise.all([
-   li.decode ? li.decode().catch(()=>{}) : Promise.resolve(),
-   ri.decode ? ri.decode().catch(()=>{}) : Promise.resolve()
-  ]);
- }finally{
-  if(current===token){
-   requestAnimationFrame(()=>{
-    left.style.visibility="visible";
-    right.style.visibility="visible";
-   });
-  }
- }
+ left.style.visibility="visible";
+ right.style.visibility="visible";
  updateUI();
 }
 function snapshot(){return{queue:[...queue],ranked:[...ranked],currentItem,lo,hi,mid,current:current?{...current}:null,done}}
@@ -159,7 +149,14 @@ function nextComparison(){
 async function startGame(){
  start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
  $("progressText").textContent="写真を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
- try{if(imgCache.size!==PEOPLE.length)await preloadAll()}catch(e){alert("画像を読み込めませんでした: "+e.message);return}
+ try{
+  if(imgCache.size!==PEOPLE.length)await preloadAll();
+ }catch(e){
+  alert("画像を読み込めませんでした: "+e.message);
+  game.classList.add("hidden");
+  start.classList.remove("hidden");
+  return;
+ }
  queue=shuffle(PEOPLE);ranked=[queue.shift()];currentItem=null;current=null;history=[];done=0;
  initialMax=0;for(let k=2;k<=PEOPLE.length;k++)initialMax+=Math.ceil(Math.log2(k));
  nextComparison();
