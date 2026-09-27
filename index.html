@@ -30,7 +30,7 @@ h1{font-size:clamp(28px,5vw,44px);margin:0 0 8px}.sub{color:var(--muted);margin:
 .place img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}.place .rank{font-size:24px;font-weight:900;margin:5px 0 1px}
 .place .nm{font-size:16px;font-weight:800;margin-bottom:4px}.place.first .rank{font-size:30px}.place.second,.place.third{padding-top:22px}
 .results-list{max-width:900px;margin:0 auto;text-align:left}.results-list h2{text-align:center;font-size:18px;margin:0 0 6px}
-.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10px}
 .row{display:flex;align-items:center;gap:6px;padding:4px 4px;border-bottom:1px solid var(--line);min-width:0}
 .num{width:30px;flex-shrink:0;font-weight:800;color:var(--muted);font-size:12px}.thumb{width:30px;height:30px;object-fit:cover;border-radius:7px;flex-shrink:0}
 .rname{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -199,29 +199,106 @@ $("manualCopy").onclick=async()=>{if(await copyNow($("copyArea").value)){$("copy
 $("closeModal").onclick=()=>$("copyModal").classList.add("hidden");
 
 async function saveImage(){
- const btn=$("saveBtn");btn.disabled=true;btn.textContent="画像を作成中…";
+ const btn=$("saveBtn");
+ btn.disabled=true;
+ btn.textContent="画像を作成中…";
  try{
-  const W=1080,H=1600,cv=document.createElement("canvas");cv.width=W;cv.height=H;const c=cv.getContext("2d");
-  c.fillStyle="#f7f7f8";c.fillRect(0,0,W,H);c.fillStyle="#18181b";c.textAlign="center";c.font="bold 60px sans-serif";c.fillText("あなたの顔ランキング",W/2,92);
-  const round=(x,y,w,h,r)=>{c.beginPath();c.roundRect(x,y,w,h,r)};
-  const draw=async(p,x,y,w,rank)=>{
-   c.fillStyle="#fff";round(x,y,w,w+95,22);c.fill();
-   const im=imgCache.get(p.name);c.save();round(x+9,y+9,w-18,w-18,16);c.clip();c.drawImage(im,x+9,y+9,w-18,w-18);c.restore();
-   c.fillStyle="#18181b";c.textAlign="center";c.font="bold 31px sans-serif";c.fillText(rank+"位",x+w/2,y+w+43);c.font="bold 27px sans-serif";c.fillText(p.name,x+w/2,y+w+78);
-  };
-  await draw(ranked[1],90,220,270,2);await draw(ranked[0],405,175,270,1);await draw(ranked[2],720,220,270,3);
-  c.fillStyle="#18181b";c.textAlign="left";c.font="bold 34px sans-serif";c.fillText("4位以下",70,745);
-  for(let i=0;i<ranked.slice(3).length;i++){
-   const p=ranked[i+3],col=i%2,row=Math.floor(i/2),x=70+col*475,y=780+row*112;
-   c.fillStyle="#fff";round(x,y,465,102,15);c.fill();const im=imgCache.get(p.name);
-   c.save();round(x+10,y+9,84,84,11);c.clip();c.drawImage(im,x+10,y+9,84,84);c.restore();
-   c.fillStyle="#71717a";c.font="bold 25px sans-serif";c.textAlign="left";c.fillText((i+4)+"位",x+110,y+42);
-   c.fillStyle="#18181b";c.font="bold 29px sans-serif";c.fillText(p.name,x+110,y+78);
+  const W=1080,H=1600,cv=document.createElement("canvas");
+  cv.width=W;cv.height=H;
+  const c=cv.getContext("2d");
+  if(!c) throw new Error("canvas");
+
+  // roundRect() 非対応ブラウザでも動く角丸パス
+  function rr(x,y,w,h,r){
+   r=Math.min(r,w/2,h/2);
+   c.beginPath();
+   c.moveTo(x+r,y);
+   c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+   c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+   c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+   c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y);
+   c.closePath();
   }
-  const blob=await new Promise(res=>cv.toBlob(res,"image/png"));if(!blob)throw Error();
-  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="顔ランキング.png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast("画像を保存しました");
- }catch(e){alert("画像の保存に失敗しました。もう一度お試しください。")}
- finally{btn.disabled=false;btn.textContent="画像で保存"}
+
+  // 保存用にも画像が完全に読み込み済みか確認
+  async function getReadyImage(p){
+   let im=imgCache.get(p.name);
+   if(im && im.complete && im.naturalWidth>0) return im;
+   im=new Image();
+   im.src=path(p);
+   if(im.decode){
+    await im.decode();
+   }else{
+    await new Promise((resolve,reject)=>{
+     im.onload=resolve; im.onerror=reject;
+    });
+   }
+   imgCache.set(p.name,im);
+   return im;
+  }
+
+  // 14枚全部の保存用画像を先に確定
+  await Promise.all(ranked.map(getReadyImage));
+
+  c.fillStyle="#f7f7f8";c.fillRect(0,0,W,H);
+  c.fillStyle="#18181b";c.textAlign="center";
+  c.font='bold 60px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+  c.fillText("あなたの顔ランキング",W/2,92);
+
+  async function drawCard(p,x,y,w,rank){
+   c.fillStyle="#fff";rr(x,y,w,w+95,22);c.fill();
+   const im=await getReadyImage(p);
+   c.save();rr(x+9,y+9,w-18,w-18,16);c.clip();
+   c.drawImage(im,x+9,y+9,w-18,w-18);c.restore();
+   c.fillStyle="#18181b";c.textAlign="center";
+   c.font='bold 31px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(rank+"位",x+w/2,y+w+43);
+   c.font='bold 27px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(p.name,x+w/2,y+w+78);
+  }
+
+  await drawCard(ranked[1],90,220,270,2);
+  await drawCard(ranked[0],405,175,270,1);
+  await drawCard(ranked[2],720,220,270,3);
+
+  c.fillStyle="#18181b";c.textAlign="left";
+  c.font='bold 34px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+  c.fillText("4位以下",70,745);
+
+  const rest=ranked.slice(3);
+  for(let i=0;i<rest.length;i++){
+   const p=rest[i],col=i%2,row=Math.floor(i/2);
+   const x=70+col*475,y=780+row*112;
+   c.fillStyle="#fff";rr(x,y,465,102,15);c.fill();
+   const im=await getReadyImage(p);
+   c.save();rr(x+10,y+9,84,84,11);c.clip();
+   c.drawImage(im,x+10,y+9,84,84);c.restore();
+   c.fillStyle="#71717a";c.textAlign="left";
+   c.font='bold 25px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText((i+4)+"位",x+110,y+42);
+   c.fillStyle="#18181b";
+   c.font='bold 29px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(p.name,x+110,y+78);
+  }
+
+  const blob=await new Promise((resolve,reject)=>{
+   try{cv.toBlob(b=>b?resolve(b):reject(new Error("blob")),"image/png")}
+   catch(e){reject(e)}
+  });
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="顔ランキング.png";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  toast("画像を保存しました");
+ }catch(e){
+  console.error("saveImage error:",e);
+  alert("画像の保存に失敗しました。ページを再読み込みして、もう一度お試しください。");
+ }finally{
+  btn.disabled=false;
+  btn.textContent="画像で保存";
+ }
 }
 $("saveBtn").onclick=saveImage;$("startBtn").onclick=startGame;$("againBtn").onclick=startGame;
 </script>
