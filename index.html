@@ -92,62 +92,66 @@ const PEOPLE=[
 
 const $=id=>document.getElementById(id);
 const start=$("start"),game=$("game"),result=$("result"),left=$("left"),right=$("right");
-let queue=[],ranked=[],currentItem=null,lo=0,hi=0,mid=0,current=null,history=[],done=0,initialMax=0;
-const imgCache=new Map();
+let ranked=[], history=[], done=0, totalMax=0;
+let runs=[], nextRuns=[], runIndex=0, leftRun=null, rightRun=null, i=0, j=0, merged=[], current=null;
 
-function path(p){return encodeURI(p.file)}
-function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-async function preloadAll(){
- await Promise.all(PEOPLE.map(async p=>{
-  const im=new Image();
-  im.decoding="async";
-  im.src=path(p);
-  try{
-   if(im.decode) await im.decode();
-   else await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=reject});
-   imgCache.set(p.name,im);
-  }catch(e){
-   throw new Error(p.file);
-  }
- }));
+function cloneRuns(arr){return arr.map(r=>[...r])}
+function snapshot(){
+ return {
+  ranked:[...ranked],runs:cloneRuns(runs),nextRuns:cloneRuns(nextRuns),runIndex,
+  leftRun:leftRun?[...leftRun]:null,rightRun:rightRun?[...rightRun]:null,
+  i,j,merged:[...merged],current:current?{a:current.a,b:current.b}:null,done
+ };
 }
-function maxSteps(lo,hi){if(lo>=hi)return 0;const m=Math.floor((lo+hi)/2);return 1+Math.max(maxSteps(lo,m),maxSteps(m+1,hi))}
-function remaining(){
- let n=currentItem?maxSteps(lo,hi):0;
- let size=ranked.length+(currentItem?1:0);
- for(let i=0;i<queue.length;i++)n+=Math.ceil(Math.log2(size+i+1));
- return n;
-}
-function updateUI(){
- $("countText").textContent=`あと最大${remaining()}回`;
- $("progressText").textContent=`${done}回選択済み`;
- $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,initialMax)*100))+"%";
- $("undoBtn").disabled=!history.length;
+function restore(x){
+ ranked=[...x.ranked];runs=cloneRuns(x.runs);nextRuns=cloneRuns(x.nextRuns);runIndex=x.runIndex;
+ leftRun=x.leftRun?[...x.leftRun]:null;rightRun=x.rightRun?[...x.rightRun]:null;
+ i=x.i;j=x.j;merged=[...x.merged];current=x.current?{a:x.current.a,b:x.current.b}:null;done=x.done;
+ showPair();
 }
 function drawChoice(btn,p){
- const cv=btn.querySelector("canvas");
- const ctx=cv.getContext("2d");
- const im=imgCache.get(p.name);
- if(!im || !im.complete || !im.naturalWidth) throw new Error("画像未準備: "+p.name);
+ const cv=btn.querySelector("canvas"),ctx=cv.getContext("2d"),im=imgCache.get(p.name);
+ if(!im||!im.complete||!im.naturalWidth)throw new Error("画像未準備: "+p.name);
  ctx.clearRect(0,0,cv.width,cv.height);
- const sw=im.naturalWidth, sh=im.naturalHeight;
- const side=Math.min(sw,sh), sx=(sw-side)/2, sy=(sh-side)/2;
+ const sw=im.naturalWidth,sh=im.naturalHeight,side=Math.min(sw,sh),sx=(sw-side)/2,sy=(sh-side)/2;
  ctx.drawImage(im,sx,sy,side,side,0,0,cv.width,cv.height);
  btn.querySelector(".name").textContent=p.name;
  btn.dataset.person=p.name;
 }
-function showPair(){
- if(!current || !current.a || !current.b)return;
- drawChoice(left,current.a);
- drawChoice(right,current.b);
- updateUI();
+function remainingMax(){
+ // Merge sort of 14 people has a deterministic safe upper bound of n*ceil(log2(n)).
+ return Math.max(0,totalMax-done);
 }
-function snapshot(){return{queue:[...queue],ranked:[...ranked],currentItem,lo,hi,mid,current:current?{...current}:null,done}}
-function restore(s){queue=[...s.queue];ranked=[...s.ranked];currentItem=s.currentItem;lo=s.lo;hi=s.hi;mid=s.mid;current=s.current?{...s.current}:null;done=s.done;showPair()}
-function nextItem(){if(!queue.length){finish();return false}currentItem=queue.shift();lo=0;hi=ranked.length;return true}
-function nextComparison(){
- if(lo>=hi){ranked.splice(lo,0,currentItem);currentItem=null;if(!nextItem())return}
- mid=Math.floor((lo+hi)/2);current={a:currentItem,b:ranked[mid]};showPair();
+function updateUI(){
+ $("countText").textContent=`あと最大${remainingMax()}回`;
+ $("progressText").textContent=`${done}回選択済み`;
+ $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,totalMax)*100))+"%";
+ $("undoBtn").disabled=!history.length;
+}
+function showPair(){
+ if(!current)return;
+ drawChoice(left,current.a);drawChoice(right,current.b);updateUI();
+}
+function prepareNextComparison(){
+ while(true){
+  if(leftRun && rightRun){
+   if(i<leftRun.length && j<rightRun.length){
+    current={a:leftRun[i],b:rightRun[j]};showPair();return;
+   }
+   while(i<leftRun.length)merged.push(leftRun[i++]);
+   while(j<rightRun.length)merged.push(rightRun[j++]);
+   nextRuns.push([...merged]);
+   leftRun=rightRun=null;merged=[];i=j=0;
+  }
+  if(runIndex<runs.length){
+   if(runIndex===runs.length-1){nextRuns.push([...runs[runIndex]]);runIndex++;continue}
+   leftRun=runs[runIndex++];rightRun=runs[runIndex++];i=j=0;merged=[];continue;
+  }
+  if(nextRuns.length===1){
+   ranked=[...nextRuns[0]];current=null;finish();return;
+  }
+  runs=cloneRuns(nextRuns);nextRuns=[];runIndex=0;
+ }
 }
 async function startGame(){
  start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
@@ -155,27 +159,37 @@ async function startGame(){
  try{
   if(imgCache.size!==PEOPLE.length)await preloadAll();
  }catch(e){
-  alert("画像を読み込めませんでした: "+e.message);
-  game.classList.add("hidden");
-  start.classList.remove("hidden");
-  return;
+  alert("画像を読み込めませんでした: "+e.message);game.classList.add("hidden");start.classList.remove("hidden");return;
  }
- queue=shuffle(PEOPLE);ranked=[queue.shift()];currentItem=null;current=null;history=[];done=0;
- initialMax=0;for(let k=2;k<=PEOPLE.length;k++)initialMax+=Math.ceil(Math.log2(k));
- nextComparison();
+ const order=shuffle(PEOPLE);
+ ranked=[];history=[];done=0;
+ runs=order.map(p=>[p]);nextRuns=[];runIndex=0;leftRun=rightRun=null;i=j=0;merged=[];current=null;
+ totalMax=PEOPLE.length*Math.ceil(Math.log2(PEOPLE.length));
+ prepareNextComparison();
 }
+let accepting=true;
 function choose(p){
- if(!current)return;
- const chosen=p;
- history.push(snapshot());
- if(chosen===currentItem)hi=mid;else lo=mid+1;
- current=null;
+ if(!current||!accepting)return;
+ accepting=false;
+ const before=snapshot();
+ history.push(before);
+ // exactly one user choice = exactly one increment
+ if(p.name===current.a.name){merged.push(leftRun[i++])}
+ else if(p.name===current.b.name){merged.push(rightRun[j++])}
+ else {history.pop();accepting=true;return}
  done++;
- nextComparison();
+ current=null;
+ prepareNextComparison();
+ accepting=true;
 }
-left.onclick=()=>{if(!current)return;const p=PEOPLE.find(x=>x.name===left.dataset.person);if(p)choose(p)};
-right.onclick=()=>{if(!current)return;const p=PEOPLE.find(x=>x.name===right.dataset.person);if(p)choose(p)};
-$("undoBtn").onclick=()=>{if(history.length)restore(history.pop())};
+left.onclick=()=>{if(current)choose(current.a)};
+right.onclick=()=>{if(current)choose(current.b)};
+$("undoBtn").onclick=()=>{
+ if(!history.length)return;
+ accepting=false;
+ restore(history.pop());
+ accepting=true;
+};
 
 function finish(){
  game.classList.add("hidden");result.classList.remove("hidden");
@@ -184,9 +198,9 @@ function finish(){
   const p=ranked[idx],el=document.createElement("div");el.className="place "+cls;
   el.innerHTML=`<div class="photo"><img src="${path(p)}" alt="${p.name}"></div><div class="rank">${idx+1}位</div><div class="nm">${p.name}</div>`;podium.appendChild(el);
  });
- ranked.slice(3).forEach((p,i)=>{
+ ranked.slice(3).forEach((p,k)=>{
   const el=document.createElement("div");el.className="row";
-  el.innerHTML=`<span class="num">${i+4}位</span><img class="thumb" src="${path(p)}" alt=""><span class="rname">${p.name}</span>`;list.appendChild(el);
+  el.innerHTML=`<span class="num">${k+4}位</span><img class="thumb" src="${path(p)}" alt=""><span class="rname">${p.name}</span>`;list.appendChild(el);
  });
 }
 function rankingText(){return "【顔ランキング】\n"+ranked.map((p,i)=>`${i+1}位 ${p.name}`).join("\n")}
