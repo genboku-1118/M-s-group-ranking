@@ -17,7 +17,7 @@ h1{font-size:clamp(28px,5vw,44px);margin:0 0 8px}.sub{color:var(--muted);margin:
 .progress{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:10px}
 .bar{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:24px}.bar>i{display:block;height:100%;background:#18181b}
 .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.choice{border:2px solid transparent;background:#fafafa;border-radius:20px;padding:12px;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent}
+.choice{border:2px solid transparent;background:#fafafa;border-radius:20px;padding:12px;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;visibility:visible!important;opacity:1!important}
 .choice:hover{border-color:#aaa}.choice img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;display:block}
 .name{font-size:20px;font-weight:700;padding:13px 4px 4px}
 .game-actions{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
@@ -125,18 +125,30 @@ function updateUI(){
  $("undoBtn").disabled=!history.length;
 }
 function showPair(){
- if(!current)return;
- const li=left.querySelector("img"),ri=right.querySelector("img");
- // 全画像はゲーム開始前に読み込み・デコード済み。
- // 比較中は visibility を触らず、左右を同期的に差し替える。
- li.src=path(current.a);
- ri.src=path(current.b);
+ if(!current || !current.a || !current.b){
+   console.error("invalid comparison state", current);
+   return;
+ }
+ const li=left.querySelector("img");
+ const ri=right.querySelector("img");
+
+ // 念のため以前の表示制御を完全解除
+ left.removeAttribute("style");
+ right.removeAttribute("style");
+ left.style.visibility="visible";
+ right.style.visibility="visible";
+ left.style.opacity="1";
+ right.style.opacity="1";
+
+ // 開始前に全画像を読み込み済みなので、ここでは同期的に差し替えるだけ
+ const la=imgCache.get(current.a.name);
+ const rb=imgCache.get(current.b.name);
+ li.src=(la && la.src) ? la.src : path(current.a);
+ ri.src=(rb && rb.src) ? rb.src : path(current.b);
  li.alt=current.a.name;
  ri.alt=current.b.name;
  left.querySelector(".name").textContent=current.a.name;
  right.querySelector(".name").textContent=current.b.name;
- left.style.visibility="visible";
- right.style.visibility="visible";
  updateUI();
 }
 function snapshot(){return{queue:[...queue],ranked:[...ranked],currentItem,lo,hi,mid,current:current?{...current}:null,done}}
@@ -161,14 +173,19 @@ async function startGame(){
  initialMax=0;for(let k=2;k<=PEOPLE.length;k++)initialMax+=Math.ceil(Math.log2(k));
  nextComparison();
 }
+let choosing=false;
 function choose(p){
- if(!current)return;
+ if(!current || choosing)return;
+ choosing=true;
  history.push(snapshot());
  if(p===currentItem)hi=mid;else lo=mid+1;
- current=null;done++;nextComparison();
+ current=null;
+ done++;
+ nextComparison();
+ requestAnimationFrame(()=>{choosing=false;});
 }
 left.onclick=()=>current&&choose(current.a);right.onclick=()=>current&&choose(current.b);
-$("undoBtn").onclick=()=>{if(history.length)restore(history.pop())};
+$("undoBtn").onclick=()=>{choosing=false;if(history.length)restore(history.pop())};
 
 function finish(){
  game.classList.add("hidden");result.classList.remove("hidden");
