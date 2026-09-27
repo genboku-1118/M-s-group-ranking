@@ -5,317 +5,198 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>顔ランキング</title>
 <style>
-:root{--bg:#f7f7f8;--card:#fff;--text:#18181b;--muted:#71717a;--line:#e4e4e7;--accent:#18181b}
+:root{--bg:#f7f7f8;--card:#fff;--text:#18181b;--muted:#71717a;--line:#e4e4e7}
 *{box-sizing:border-box}
 body{margin:0;background:linear-gradient(180deg,#fafafa,#f1f1f3);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
 button{font:inherit}
 .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 48px}
 header{text-align:center;margin:10px 0 24px}
-h1{font-size:clamp(28px,5vw,44px);margin:0 0 8px;letter-spacing:.02em}
-.sub{color:var(--muted);margin:0}
+h1{font-size:clamp(28px,5vw,44px);margin:0 0 8px}.sub{color:var(--muted);margin:0}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 10px 30px #0000000a;padding:22px}
 .hidden{display:none!important}
 .progress{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:10px}
-.bar{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:24px}
-.bar>i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.bar{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:24px}.bar>i{display:block;height:100%;background:#18181b}
 .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.choice{border:0;background:#fafafa;border:2px solid transparent;border-radius:20px;padding:12px;cursor:pointer;transition:none}
-.choice:hover{border-color:#aaa;box-shadow:0 10px 24px #00000012}
-.choice img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;display:block}
+.choice{border:2px solid transparent;background:#fafafa;border-radius:20px;padding:12px;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent}
+.choice:hover{border-color:#aaa}.choice img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;display:block}
 .name{font-size:20px;font-weight:700;padding:13px 4px 4px}
-.hint{text-align:center;color:var(--muted);font-size:13px;margin:18px 0 0}.game-actions{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px}.game-actions .hint{margin:0}.secondary:disabled{opacity:.45;cursor:not-allowed}
-.start{text-align:center;padding:30px 10px}
-.start p{color:var(--muted);line-height:1.8}
+.game-actions{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px}.start{text-align:center;padding:30px 10px}.start p{color:var(--muted);line-height:1.8}
 .primary{border:0;background:#18181b;color:#fff;border-radius:14px;padding:14px 28px;font-weight:700;cursor:pointer}
-.primary:hover{opacity:.88}
-.result{text-align:center}
-.podium{display:grid;grid-template-columns:1fr 1.18fr 1fr;align-items:end;gap:10px;margin:26px auto 30px;max-width:760px}
-.place{min-width:0}
-.place .photo{background:#fff;border-radius:18px;padding:8px;border:1px solid var(--line)}
-.place img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
-.place .rank{font-size:28px;font-weight:900;margin:8px 0 2px}
-.place .nm{font-size:18px;font-weight:800;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis}
-.place.first .photo{padding:10px}
-.place.first .rank{font-size:36px}
-.place.second,.place.third{padding-top:34px}
-.results-list{max-width:760px;margin:0 auto;text-align:left}
-.results-list h2{text-align:center;font-size:20px;margin:0 0 14px}
-.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.row{display:flex;align-items:center;gap:9px;padding:7px 8px;border-bottom:1px solid var(--line);min-width:0}
-.row:last-child{border-bottom:0}
-.num{width:28px;flex-shrink:0;font-weight:800;color:var(--muted);font-size:13px}
-.thumb{width:36px;height:36px;object-fit:cover;border-radius:8px;flex-shrink:0}
-.rname{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.actions{display:flex;justify-content:center;gap:10px;margin-top:26px;flex-wrap:wrap}
 .secondary{border:1px solid var(--line);background:#fff;color:#222;border-radius:14px;padding:12px 20px;font-weight:700;cursor:pointer}
-.note{font-size:12px;color:var(--muted);line-height:1.7;margin-top:18px}
+.secondary:disabled{opacity:.45;cursor:not-allowed}
+.result{text-align:center}.podium{display:grid;grid-template-columns:1fr 1.18fr 1fr;align-items:end;gap:10px;margin:26px auto 30px;max-width:760px}
+.place{min-width:0}.place .photo{background:#fff;border-radius:18px;padding:8px;border:1px solid var(--line)}
+.place img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}.place .rank{font-size:28px;font-weight:900;margin:8px 0 2px}
+.place .nm{font-size:18px;font-weight:800;margin-bottom:10px}.place.first .rank{font-size:36px}.place.second,.place.third{padding-top:34px}
+.results-list{max-width:900px;margin:0 auto;text-align:left}.results-list h2{text-align:center;font-size:20px;margin:0 0 14px}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px}
+.row{display:flex;align-items:center;gap:7px;padding:7px 5px;border-bottom:1px solid var(--line);min-width:0}
+.num{width:30px;flex-shrink:0;font-weight:800;color:var(--muted);font-size:13px}.thumb{width:34px;height:34px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.rname{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:26px;flex-wrap:wrap}.note{font-size:12px;color:var(--muted);margin-top:18px}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.modal-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:18px}.modal textarea{width:100%;height:250px;padding:10px;border:1px solid var(--line);border-radius:10px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#18181b;color:#fff;padding:11px 16px;border-radius:12px;z-index:60}
 @media(max-width:640px){
- .wrap{padding:16px 10px 36px}.panel{padding:14px;border-radius:18px}.choice-grid{gap:8px}
- .choice{padding:7px;border-radius:15px}.choice img{border-radius:10px}.name{font-size:17px;padding:9px 2px 3px}
- .podium{gap:5px}.place .rank{font-size:23px}.place.first .rank{font-size:30px}.place .nm{font-size:15px}
- .place.second,.place.third{padding-top:25px}
+ .wrap{padding:16px 10px 36px}.panel{padding:14px}.choice-grid{gap:8px}.choice{padding:7px}.name{font-size:17px}
+ .podium{gap:5px;margin-bottom:18px}.place .rank{font-size:23px}.place.first .rank{font-size:30px}.place .nm{font-size:15px}.place.second,.place.third{padding-top:25px}
+ .results-grid{grid-template-columns:repeat(3,1fr);gap:0 4px}.row{gap:3px;padding:5px 1px}.num{width:25px;font-size:11px}.thumb{width:29px;height:29px}.rname{font-size:12px}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <h1>顔ランキング</h1>
-  <p class="sub" id="subtitle">好きなほうを選んでください</p>
-</header>
+<header><h1>顔ランキング</h1><p class="sub">好きなほうを選んでください</p></header>
 
 <section id="start" class="panel start">
-  <h2>あなたの好みランキングを作ろう</h2>
-  <p>写真を2人ずつ比較します。<br>直感で「好きなほう」を選んでください。</p>
-  <button class="primary" id="startBtn">ランキングを始める</button>
+<h2>あなたの好みランキングを作ろう</h2>
+<p>写真を2人ずつ比較します。<br>直感で「好きなほう」を選んでください。</p>
+<button class="primary" id="startBtn">ランキングを始める</button>
 </section>
 
 <section id="game" class="panel hidden">
-  <div class="progress"><span id="progressText"></span><span id="countText"></span></div>
-  <div class="bar"><i id="bar"></i></div>
-  <div class="choice-grid">
-    <button class="choice" id="left"><img><div class="name"></div></button>
-    <button class="choice" id="right"><img><div class="name"></div></button>
-  </div>
-  <div class="game-actions"><button class="secondary" id="undoBtn" disabled>ひとつ前に戻る</button><span class="hint">写真をタップして選択</span></div>
+<div class="progress"><span id="progressText"></span><span id="countText"></span></div>
+<div class="bar"><i id="bar" style="width:0"></i></div>
+<div class="choice-grid">
+<button class="choice" id="left"><img alt=""><div class="name"></div></button>
+<button class="choice" id="right"><img alt=""><div class="name"></div></button>
+</div>
+<div class="game-actions"><button class="secondary" id="undoBtn" disabled>ひとつ前に戻る</button><span class="hint">写真をタップして選択</span></div>
 </section>
 
 <section id="result" class="panel result hidden">
-  <h2>あなたのランキング</h2>
-  <p class="sub">選んだ結果から順位を作成しました</p>
-  <div class="podium" id="podium"></div>
-  <div class="results-list">
-    <h2>4位以下</h2>
-    <div id="list" class="results-grid"></div>
-  </div>
-  <div class="actions">
-    <button class="primary" id="againBtn">もう一度やる</button>
-    <button class="secondary" id="copyBtn">結果をコピー</button><button class="secondary" id="saveBtn">画像で保存</button>
-  </div>
-  <p class="note">※この試作版では結果はこの端末のブラウザ内だけで処理されます。誰かの結果をサーバーに送信・保存する機能はありません。</p>
+<h2>あなたのランキング</h2><p class="sub">選んだ結果から順位を作成しました</p>
+<div class="podium" id="podium"></div>
+<div class="results-list"><h2>4位以下</h2><div id="list" class="results-grid"></div></div>
+<div class="actions">
+<button class="primary" id="againBtn">もう一度やる</button>
+<button class="secondary" id="copyBtn">結果をコピー</button>
+<button class="secondary" id="saveBtn">画像で保存</button>
+</div>
+<p class="note">※結果はこの端末のブラウザ内だけで処理されます。</p>
 </section>
 </div>
 
+<div id="copyModal" class="modal hidden"><div class="modal-card">
+<h3>ランキング結果</h3><textarea id="copyArea" readonly></textarea>
+<div class="modal-actions"><button class="secondary" id="closeModal">閉じる</button><button class="primary" id="manualCopy">コピーする</button></div>
+</div></div>
+
 <script>
-const PEOPLE = [
-  {name:"はゆ",file:"はゆ.PNG"},{name:"のん",file:"のん.PNG"},
-  {name:"みあ",file:"みあ.PNG"},{name:"しゅらん",file:"しゅらん.PNG"},
-  {name:"つき",file:"つき.PNG"},{name:"あまね",file:"あまね.PNG"},
-  {name:"るる",file:"るる.PNG"},{name:"あむ",file:"あむ.PNG"},
-  {name:"ひめ",file:"ひめ.PNG"},{name:"ねむち",file:"ねむち.PNG"},
-  {name:"なこ",file:"なこ.PNG"},{name:"りり",file:"りり.PNG"},
-  {name:"はお",file:"はお.PNG"},{name:"める",file:"める.PNG"}
-];
+const PEOPLE=[
+{name:"はゆ",file:"はゆ.PNG"},{name:"のん",file:"のん.PNG"},{name:"みあ",file:"みあ.PNG"},{name:"しゅらん",file:"しゅらん.PNG"},
+{name:"つき",file:"つき.PNG"},{name:"あまね",file:"あまね.PNG"},{name:"るる",file:"るる.PNG"},{name:"あむ",file:"あむ.PNG"},
+{name:"ひめ",file:"ひめ.PNG"},{name:"ねむち",file:"ねむち.PNG"},{name:"なこ",file:"なこ.PNG"},{name:"りり",file:"りり.PNG"},
+{name:"はお",file:"はお.PNG"},{name:"める",file:"める.PNG"}];
 
-const start=document.getElementById("start"), game=document.getElementById("game"), result=document.getElementById("result");
-const left=document.getElementById("left"), right=document.getElementById("right");
-let order=[], queue=[], ranked=[], current=null, total=0, initialTotal=0, done=0;
-let currentItem=null, lo=0, hi=0, mid=0, history=[];
+const $=id=>document.getElementById(id);
+const start=$("start"),game=$("game"),result=$("result"),left=$("left"),right=$("right");
+let queue=[],ranked=[],currentItem=null,lo=0,hi=0,mid=0,current=null,history=[],done=0,initialMax=0;
+const imgCache=new Map();
 
-// 現在の状態から、今後必要になり得る比較回数の最大値を毎回再計算します。
-function binaryMaxSteps(lo, hi){
-  if(lo>=hi) return 0;
-  const m=Math.floor((lo+hi)/2);
-  return 1 + Math.max(binaryMaxSteps(lo,m), binaryMaxSteps(m+1,hi));
-}
-function futureMaxSteps(n){
-  let sum=0;
-  for(let k=n;k<PEOPLE.length;k++) sum += Math.ceil(Math.log2(k+1));
-  return sum;
-}
-function updateRemaining(){
-  const currentMax=binaryMaxSteps(lo,hi);
-  const futureMax=currentItem ? futureMaxSteps(ranked.length+1) : futureMaxSteps(ranked.length);
-  total=currentMax+futureMax;
-  document.getElementById("countText").textContent=`あと最大${total}回`;
-  return total;
-}
-
+function path(p){return encodeURI(p.file)}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
-function showPerson(btn,p){
-  btn.querySelector("img").src=encodeURI(p.file || p.src);
-  btn.querySelector("img").alt=p.name;
-  btn.querySelector(".name").textContent=p.name;
+function preloadAll(){
+ return Promise.all(PEOPLE.map(p=>new Promise((resolve,reject)=>{
+  const im=new Image();im.onload=()=>{imgCache.set(p.name,im);resolve()};im.onerror=()=>reject(new Error(p.file));im.src=path(p);
+ })));
 }
-
-function preloadImages(){
-  return Promise.all(PEOPLE.map(p=>new Promise(resolve=>{
-    const im=new Image();
-    im.onload=im.onerror=resolve;
-    im.src=encodeURI(p.file || p.src);
-  })));
+function maxSteps(lo,hi){if(lo>=hi)return 0;const m=Math.floor((lo+hi)/2);return 1+Math.max(maxSteps(lo,m),maxSteps(m+1,hi))}
+function remaining(){
+ let n=currentItem?maxSteps(lo,hi):0;
+ let size=ranked.length+(currentItem?1:0);
+ for(let i=0;i<queue.length;i++)n+=Math.ceil(Math.log2(size+i+1));
+ return n;
 }
-
-function setNextInsertion(){
-  if(queue.length===0){ finish(ranked); return false; }
-  currentItem=queue.shift();
-  lo=0;
-  hi=ranked.length;
-  return true;
+function updateUI(){
+ $("countText").textContent=`あと最大${remaining()}回`;
+ $("progressText").textContent=`${done}回選択済み`;
+ $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,initialMax)*100))+"%";
+ $("undoBtn").disabled=!history.length;
 }
-
-function render(){
-  if(!current)return;
-  showPerson(left,current.a);
-  showPerson(right,current.b);
-  const pct=Math.min(99,Math.max(0,Math.round(((initialTotal-total)/Math.max(1,initialTotal))*100)));
-  document.getElementById("progressText").textContent="比較中";
-  document.getElementById("bar").style.width=pct+"%";
-  document.getElementById("undoBtn").disabled=history.length===0;
+function showPair(){
+ if(!current)return;
+ /* 2枚のsrcを同じ描画タイミングで設定。全画像は開始前に読み込み済み */
+ left.querySelector("img").src=path(current.a);right.querySelector("img").src=path(current.b);
+ left.querySelector(".name").textContent=current.a.name;right.querySelector(".name").textContent=current.b.name;
+ updateUI();
 }
-
-function renderComparison(){
-  if(lo>=hi){
-    ranked.splice(lo,0,currentItem);
-    currentItem=null;
-    if(!setNextInsertion()){
-      document.getElementById("undoBtn").disabled=history.length===0;
-      return;
-    }
-  }
-  mid=Math.floor((lo+hi)/2);
-  current={
-    a:currentItem,
-    b:ranked[mid]
-  };
-  updateRemaining();
-  render();
+function snapshot(){return{queue:[...queue],ranked:[...ranked],currentItem,lo,hi,mid,current:current?{...current}:null,done}}
+function restore(s){queue=[...s.queue];ranked=[...s.ranked];currentItem=s.currentItem;lo=s.lo;hi=s.hi;mid=s.mid;current=s.current?{...s.current}:null;done=s.done;showPair()}
+function nextItem(){if(!queue.length){finish();return false}currentItem=queue.shift();lo=0;hi=ranked.length;return true}
+function nextComparison(){
+ if(lo>=hi){ranked.splice(lo,0,currentItem);currentItem=null;if(!nextItem())return}
+ mid=Math.floor((lo+hi)/2);current={a:currentItem,b:ranked[mid]};showPair();
 }
-
-function startGame(){
-  start.classList.add("hidden");
-  result.classList.add("hidden");
-  game.classList.remove("hidden");
-
-  order=shuffle(PEOPLE);
-  queue=[...order];
-  ranked=[queue.shift()];
-  current=null;
-  currentItem=null;
-  done=0;
-  history=[];
-
-  initialTotal=futureMaxSteps(1);
-  total=initialTotal;
-  document.getElementById("undoBtn").disabled=true;
-  preloadImages().then(()=>renderComparison());
+async function startGame(){
+ start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
+ $("progressText").textContent="写真を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
+ try{if(imgCache.size!==PEOPLE.length)await preloadAll()}catch(e){alert("画像を読み込めませんでした: "+e.message);return}
+ queue=shuffle(PEOPLE);ranked=[queue.shift()];currentItem=null;current=null;history=[];done=0;
+ initialMax=0;for(let k=2;k<=PEOPLE.length;k++)initialMax+=Math.ceil(Math.log2(k));
+ nextComparison();
 }
-
-function snapshot(){
-  return {
-    ranked:[...ranked],
-    queue:[...queue],
-    currentItem,
-    lo,
-    hi,
-    mid,
-    done,
-    total,
-    currentA:current ? current.a : null,
-    currentB:current ? current.b : null,
-    initialTotal
-  };
-}
-
-function restore(snap){
-  ranked=[...snap.ranked];
-  queue=[...snap.queue];
-  currentItem=snap.currentItem;
-  lo=snap.lo;
-  hi=snap.hi;
-  mid=snap.mid;
-  done=snap.done;
-  total=snap.total;
-  initialTotal=snap.initialTotal;
-  current=snap.currentA ? {a:snap.currentA,b:snap.currentB} : null;
-  updateRemaining();
-  render();
-}
-
 function choose(p){
-  if(!current)return;
-  history.push(snapshot());
-  if(p===currentItem) hi=mid;
-  else lo=mid+1;
-  current=null;
-  done++;
-  renderComparison();
+ if(!current)return;
+ history.push(snapshot());
+ if(p===currentItem)hi=mid;else lo=mid+1;
+ current=null;done++;nextComparison();
 }
+left.onclick=()=>current&&choose(current.a);right.onclick=()=>current&&choose(current.b);
+$("undoBtn").onclick=()=>{if(history.length)restore(history.pop())};
 
-left.onclick=()=>{if(current)choose(current.a)};
-right.onclick=()=>{if(current)choose(current.b)};
-
-document.getElementById("undoBtn").onclick=()=>{
-  if(!history.length)return;
-  restore(history.pop());
+function finish(){
+ game.classList.add("hidden");result.classList.remove("hidden");
+ const podium=$("podium"),list=$("list");podium.innerHTML="";list.innerHTML="";
+ [[1,"second"],[0,"first"],[2,"third"]].forEach(([idx,cls])=>{
+  const p=ranked[idx],el=document.createElement("div");el.className="place "+cls;
+  el.innerHTML=`<div class="photo"><img src="${path(p)}" alt="${p.name}"></div><div class="rank">${idx+1}位</div><div class="nm">${p.name}</div>`;podium.appendChild(el);
+ });
+ ranked.slice(3).forEach((p,i)=>{
+  const el=document.createElement("div");el.className="row";
+  el.innerHTML=`<span class="num">${i+4}位</span><img class="thumb" src="${path(p)}" alt=""><span class="rname">${p.name}</span>`;list.appendChild(el);
+ });
+}
+function rankingText(){return "【顔ランキング】\n"+ranked.map((p,i)=>`${i+1}位 ${p.name}`).join("\n")}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1600)}
+async function copyNow(text){
+ if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);return true}catch(e){}}
+ const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();
+ let ok=false;try{ok=document.execCommand("copy")}catch(e){}ta.remove();return ok;
+}
+$("copyBtn").onclick=async()=>{
+ const t=rankingText();if(await copyNow(t)){toast("コピーしました")}else{$("copyArea").value=t;$("copyModal").classList.remove("hidden");$("copyArea").select()}
 };
+$("manualCopy").onclick=async()=>{if(await copyNow($("copyArea").value)){$("copyModal").classList.add("hidden");toast("コピーしました")}else{$("copyArea").select()}};
+$("closeModal").onclick=()=>$("copyModal").classList.add("hidden");
 
-function finish(ranked){
-  game.classList.add("hidden");result.classList.remove("hidden");
-  document.getElementById("bar").style.width="100%";
-  const podium=document.getElementById("podium"), list=document.getElementById("list");
-  podium.innerHTML="";
-  const cls=["second","first","third"], pos=[1,0,2];
-  pos.forEach((idx,i)=>{
-    const p=ranked[idx];
-    const el=document.createElement("div");el.className="place "+cls[i];
-    el.innerHTML=`<div class="photo"><img src="${encodeURI(p.file || p.src)}" alt="${p.name}"></div><div class="rank">${idx+1}位</div><div class="nm">${p.name}</div>`;
-    podium.appendChild(el);
-  });
-  list.innerHTML="";
-  ranked.slice(3).forEach((p,i)=>{
-    const row=document.createElement("div");row.className="row";
-    row.innerHTML=`<span class="num">${i+4}位</span><img class="thumb" src="${encodeURI(p.file || p.src)}" alt=""><span class="rname">${p.name}</span>`;
-    list.appendChild(row);
-  });
-  window.finalRanking=ranked;
-}
-
-document.getElementById("saveBtn").onclick=async()=>{
-  const ranked=window.finalRanking;
-  if(!ranked)return;
-  const W=1080,H=1600,canvas=document.createElement("canvas");
-  canvas.width=W;canvas.height=H;
-  const c=canvas.getContext("2d");
-  c.fillStyle="#f7f7f8";c.fillRect(0,0,W,H);
-  c.fillStyle="#18181b";c.textAlign="center";c.font="bold 62px sans-serif";c.fillText("あなたの顔ランキング",W/2,100);
-  c.fillStyle="#71717a";c.font="28px sans-serif";c.fillText("MY FACE RANKING",W/2,148);
-  const loadImg=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});
-  const rounded=(x,y,w,h,r)=>{c.beginPath();c.roundRect(x,y,w,h,r);};
-  const drawCard=async(p,x,y,w,rank)=>{
-    c.fillStyle="#fff";rounded(x,y,w,w+104,24);c.fill();
-    const im=await loadImg(encodeURI(p.file || p.src));c.save();rounded(x+10,y+10,w-20,w-20,18);c.clip();c.drawImage(im,x+10,y+10,w-20,w-20);c.restore();
-    c.fillStyle="#18181b";c.textAlign="center";c.font="bold 31px sans-serif";c.fillText(rank+"位",x+w/2,y+w+47);
-    c.font="bold 28px sans-serif";c.fillText(p.name,x+w/2,y+w+84);
+async function saveImage(){
+ const btn=$("saveBtn");btn.disabled=true;btn.textContent="画像を作成中…";
+ try{
+  const W=1080,H=1600,cv=document.createElement("canvas");cv.width=W;cv.height=H;const c=cv.getContext("2d");
+  c.fillStyle="#f7f7f8";c.fillRect(0,0,W,H);c.fillStyle="#18181b";c.textAlign="center";c.font="bold 60px sans-serif";c.fillText("あなたの顔ランキング",W/2,92);
+  const round=(x,y,w,h,r)=>{c.beginPath();c.roundRect(x,y,w,h,r)};
+  const draw=async(p,x,y,w,rank)=>{
+   c.fillStyle="#fff";round(x,y,w,w+95,22);c.fill();
+   const im=imgCache.get(p.name);c.save();round(x+9,y+9,w-18,w-18,16);c.clip();c.drawImage(im,x+9,y+9,w-18,w-18);c.restore();
+   c.fillStyle="#18181b";c.textAlign="center";c.font="bold 31px sans-serif";c.fillText(rank+"位",x+w/2,y+w+43);c.font="bold 27px sans-serif";c.fillText(p.name,x+w/2,y+w+78);
   };
-  // Podium: 2nd, 1st, 3rd
-  const cardW=270;
-  await drawCard(ranked[1],90,235,cardW,2);
-  await drawCard(ranked[0],405,190,cardW,1);
-  await drawCard(ranked[2],720,235,cardW,3);
-  c.fillStyle="#18181b";c.textAlign="left";c.font="bold 34px sans-serif";c.fillText("4位以下",70,760);
-  const rest=ranked.slice(3), colW=465, startY=800, rowH=112;
-  for(let i=0;i<rest.length;i++){
-    const col=i%2,row=Math.floor(i/2),x=70+col*475,y=startY+row*rowH,p=rest[i];
-    c.fillStyle="#fff";rounded(x,y,colW,rowH-10,16);c.fill();
-    const im=await loadImg(encodeURI(p.file || p.src));c.save();rounded(x+10,y+10,84,84,12);c.clip();c.drawImage(im,x+10,y+10,84,84);c.restore();
-    c.fillStyle="#71717a";c.font="bold 25px sans-serif";c.textAlign="left";c.fillText((i+4)+"位",x+110,y+45);
-    c.fillStyle="#18181b";c.font="bold 29px sans-serif";c.fillText(p.name,x+110,y+80);
+  await draw(ranked[1],90,220,270,2);await draw(ranked[0],405,175,270,1);await draw(ranked[2],720,220,270,3);
+  c.fillStyle="#18181b";c.textAlign="left";c.font="bold 34px sans-serif";c.fillText("4位以下",70,745);
+  for(let i=0;i<ranked.slice(3).length;i++){
+   const p=ranked[i+3],col=i%2,row=Math.floor(i/2),x=70+col*475,y=780+row*112;
+   c.fillStyle="#fff";round(x,y,465,102,15);c.fill();const im=imgCache.get(p.name);
+   c.save();round(x+10,y+9,84,84,11);c.clip();c.drawImage(im,x+10,y+9,84,84);c.restore();
+   c.fillStyle="#71717a";c.font="bold 25px sans-serif";c.textAlign="left";c.fillText((i+4)+"位",x+110,y+42);
+   c.fillStyle="#18181b";c.font="bold 29px sans-serif";c.fillText(p.name,x+110,y+78);
   }
-  c.fillStyle="#a1a1aa";c.textAlign="center";c.font="20px sans-serif";c.fillText("自分の好みで作成したランキング",W/2,H-30);
-  canvas.toBlob(blob=>{
-    if(!blob){alert("画像を作成できませんでした。もう一度お試しください。");return;}
-    const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="顔ランキング.png";a.click();URL.revokeObjectURL(url);
-  },"image/png");
-};
-
-document.getElementById("startBtn").onclick=startGame;
-document.getElementById("againBtn").onclick=startGame;
-document.getElementById("copyBtn").onclick=async()=>{
-  const text="【顔ランキング】\n"+window.finalRanking.map((p,i)=>`${i+1}位 ${p.name}`).join("\n");
-  try{await navigator.clipboard.writeText(text);document.getElementById("copyBtn").textContent="コピーしました";}
-  catch(e){prompt("以下をコピーしてください",text)}
-};
+  const blob=await new Promise(res=>cv.toBlob(res,"image/png"));if(!blob)throw Error();
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="顔ランキング.png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast("画像を保存しました");
+ }catch(e){alert("画像の保存に失敗しました。もう一度お試しください。")}
+ finally{btn.disabled=false;btn.textContent="画像で保存"}
+}
+$("saveBtn").onclick=saveImage;$("startBtn").onclick=startGame;$("againBtn").onclick=startGame;
 </script>
 </body>
 </html>
