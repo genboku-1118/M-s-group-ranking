@@ -32,9 +32,9 @@ header{text-align:center;margin:8px 0 18px}h1{margin:0;font-size:34px}.sub{color
 
 <section id="start" class="panel start">
 <h2>あなたの好みランキングを作ろう</h2>
-<p class="sub">14人の写真を2人ずつ比較して順位を作ります。</p>
+<p class="sub">15人の写真を2人ずつ比較して順位を作ります。</p>
 <button id="startBtn" class="primary">ランキングを始める</button>
-<div id="loading" class="loading hidden">14枚の写真を読み込み中…</div>
+<div id="loading" class="loading hidden">15枚の写真を読み込み中…</div>
 </section>
 
 <section id="game" class="panel hidden">
@@ -68,7 +68,7 @@ const PEOPLE=[
  ["はゆ","はゆ.PNG"],["のん","のん.PNG"],["みあ","みあ.PNG"],["しゅらん","しゅらん.PNG"],
  ["つき","つき.PNG"],["あまね","あまね.PNG"],["るる","るる.PNG"],["あむ","あむ.PNG"],
  ["ひめ","ひめ.PNG"],["ねむち","ねむち.PNG"],["なこ","なこ.PNG"],["りり","りり.PNG"],
- ["はお","はお.PNG"],["める","める.PNG"]
+ ["はお","はお.PNG"],["める","める.PNG"],["うに","うに.PNG"]
 ].map(([name,file])=>({name,file}));
 
 const $=id=>document.getElementById(id);
@@ -190,6 +190,20 @@ function drawPerson(button,p){
  const sx=(im.naturalWidth-side)/2,sy=(im.naturalHeight-side)/2;
  ctx.drawImage(im,sx,sy,side,side,0,0,800,800);
  button.querySelector(".name").textContent=p.name;
+}
+function maxComparisons(n){
+ let sizes=Array(n).fill(1), total=0;
+ while(sizes.length>1){
+   const next=[];
+   for(let k=0;k<sizes.length;k+=2){
+     if(k+1>=sizes.length){next.push(sizes[k]);continue}
+     const a=sizes[k],b=sizes[k+1];
+     total+=a+b-1;
+     next.push(a+b);
+   }
+   sizes=next;
+ }
+ return total;
 }
 function renderPair(){
  const p=state.pair;
