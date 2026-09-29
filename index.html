@@ -99,17 +99,30 @@ let ranked=[], history=[], done=0, totalMax=0;
 
 let selectedMode="face";
 
-/* 画像は両モードで共通。開始時に全員分を確実に読み込む */
+/* 画像は必要な2枚だけ待って同時表示。残りはバックグラウンドで先読みする */
 const imgCache=new Map();
 function path(p){ return encodeURI(p.file); }
-async function preloadAll(){
-  imgCache.clear();
-  await Promise.all(PEOPLE.map(p=>new Promise((resolve,reject)=>{
+
+function loadImage(p){
+  const cached=imgCache.get(p.name);
+  if(cached?.complete && cached.naturalWidth) return Promise.resolve(cached);
+  return new Promise((resolve,reject)=>{
+    const im=cached || new Image();
+    imgCache.set(p.name,im);
+    if(!cached) im.src=path(p);
+    if(im.complete && im.naturalWidth){ resolve(im); return; }
+    im.onload=()=>resolve(im);
+    im.onerror=()=>reject(new Error("画像を読み込めませんでした: "+p.file));
+  });
+}
+
+function preloadBackground(){
+  PEOPLE.forEach(p=>{
+    if(imgCache.has(p.name)) return;
     const im=new Image();
-    im.onload=()=>{ imgCache.set(p.name,im); resolve(); };
-    im.onerror=()=>reject(new Error(p.file));
+    imgCache.set(p.name,im);
     im.src=path(p);
-  })));
+  });
 }
 
 let runs=[], nextRuns=[], runIndex=0, leftRun=null, rightRun=null, i=0, j=0, merged=[], current=null;
@@ -147,9 +160,28 @@ function updateUI(){
  $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,totalMax)*100))+"%";
  $("undoBtn").disabled=!history.length;
 }
-function showPair(){
+async function showPair(){
  if(!current)return;
- drawChoice(left,current.a);drawChoice(right,current.b);updateUI();
+ const pair=current;
+ left.style.visibility="hidden";
+ right.style.visibility="hidden";
+ left.disabled=true;
+ right.disabled=true;
+ updateUI();
+ try{
+   await Promise.all([loadImage(pair.a),loadImage(pair.b)]);
+   if(!current || current.a!==pair.a || current.b!==pair.b) return;
+   drawChoice(left,pair.a);
+   drawChoice(right,pair.b);
+   left.style.visibility="visible";
+   right.style.visibility="visible";
+   left.disabled=false;
+   right.disabled=false;
+   setTimeout(preloadBackground,0);
+ }catch(e){
+   console.error(e);
+   alert("画像を読み込めませんでした: "+e.message);
+ }
 }
 function prepareNextComparison(){
  while(true){
@@ -175,12 +207,7 @@ function prepareNextComparison(){
 async function startGame(){
  accepting=true;
  start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
- $("progressText").textContent="写真を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
- try{
-  if(imgCache.size!==PEOPLE.length)await preloadAll();
- }catch(e){
-  alert("画像を読み込めませんでした: "+e.message);game.classList.add("hidden");start.classList.remove("hidden");return;
- }
+ $("progressText").textContent="最初の2枚を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
  const order=shuffle(PEOPLE);
  ranked=[];history=[];done=0;
  runs=order.map(p=>[p]);nextRuns=[];runIndex=0;leftRun=rightRun=null;i=j=0;merged=[];current=null;
