@@ -96,7 +96,22 @@ const PEOPLE=[
 const $=id=>document.getElementById(id);
 const start=$("start"),game=$("game"),result=$("result"),left=$("left"),right=$("right");
 let ranked=[], history=[], done=0, totalMax=0;
+
 let selectedMode="face";
+
+/* 画像は両モードで共通。開始時に全員分を確実に読み込む */
+const imgCache=new Map();
+function path(p){ return encodeURI(p.file); }
+async function preloadAll(){
+  imgCache.clear();
+  await Promise.all(PEOPLE.map(p=>new Promise((resolve,reject)=>{
+    const im=new Image();
+    im.onload=()=>{ imgCache.set(p.name,im); resolve(); };
+    im.onerror=()=>reject(new Error(p.file));
+    im.src=path(p);
+  })));
+}
+
 let runs=[], nextRuns=[], runIndex=0, leftRun=null, rightRun=null, i=0, j=0, merged=[], current=null;
 
 function cloneRuns(arr){return arr.map(r=>[...r])}
@@ -158,6 +173,7 @@ function prepareNextComparison(){
  }
 }
 async function startGame(){
+ accepting=true;
  start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
  $("progressText").textContent="写真を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
  try{
