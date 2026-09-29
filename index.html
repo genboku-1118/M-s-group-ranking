@@ -5,318 +5,331 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>顔ランキング</title>
 <style>
-*{box-sizing:border-box} body{margin:0;background:#f5f5f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-button{font:inherit}.wrap{max-width:1050px;margin:auto;padding:18px 12px 40px}.hidden{display:none!important}
-header{text-align:center;margin:8px 0 18px}h1{margin:0;font-size:34px}.sub{color:#737373;margin:6px 0}
-.panel{background:white;border:1px solid #e5e5e5;border-radius:22px;padding:20px;box-shadow:0 8px 30px #00000008}
-.start{text-align:center;padding:50px 15px}.primary,.secondary{border-radius:13px;padding:12px 20px;font-weight:700;cursor:pointer}
-.primary{border:0;background:#171717;color:white}.secondary{border:1px solid #ddd;background:white;color:#171717}.secondary:disabled{opacity:.4}
-.status{display:flex;justify-content:space-between;color:#666;margin-bottom:9px}.bar{height:8px;background:#eee;border-radius:10px;overflow:hidden;margin-bottom:18px}.bar div{height:100%;background:#171717}
-.choices{display:grid;grid-template-columns:1fr 1fr;gap:18px}.choice{border:2px solid transparent;background:#fafafa;border-radius:20px;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.choice:active{border-color:#171717}.choice canvas{display:block;width:100%;aspect-ratio:1;border-radius:14px}.choice .name{font-size:21px;font-weight:800;padding:12px 2px 2px}
-.game-actions{text-align:center;margin-top:16px}
-.result{text-align:center}.podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;align-items:end;gap:8px;max-width:650px;margin:12px auto 14px}
-.place{min-width:0}.photo{border:1px solid #e5e5e5;border-radius:16px;padding:7px}.photo img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:11px}
-.place.second,.place.third{padding-top:20px}.rank{font-size:24px;font-weight:900;margin-top:5px}.first .rank{font-size:29px}.nm{font-weight:800}
-.rest-title{font-size:18px;margin:12px 0 5px}.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 9px;text-align:left}
-.row{display:flex;align-items:center;gap:5px;border-bottom:1px solid #e5e5e5;padding:4px 2px;min-width:0}.num{width:30px;color:#777;font-weight:800;font-size:12px;flex:none}
-.thumb{width:30px;height:30px;object-fit:cover;border-radius:7px;flex:none}.rname{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:18px}.loading{font-weight:700;margin-top:12px;color:#666}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#171717;color:white;padding:10px 15px;border-radius:11px;z-index:20}
-@media(max-width:640px){.wrap{padding:10px 7px 25px}.panel{padding:11px}.choices{gap:7px}.choice{padding:6px}.choice .name{font-size:17px}.podium{gap:4px}.rank{font-size:19px}.first .rank{font-size:23px}.nm{font-size:13px}.results-grid{gap:0 3px}.row{gap:2px;padding:3px 0}.num{width:24px;font-size:10px}.thumb{width:25px;height:25px}.rname{font-size:11px}}
+:root{--bg:#f7f7f8;--card:#fff;--text:#18181b;--muted:#71717a;--line:#e4e4e7}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#fafafa,#f1f1f3);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+button{font:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 48px}
+header{text-align:center;margin:10px 0 24px}
+h1{font-size:clamp(28px,5vw,44px);margin:0 0 8px}.sub{color:var(--muted);margin:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 10px 30px #0000000a;padding:22px}
+.hidden{display:none!important}
+.progress{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:10px}
+.bar{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:24px}.bar>i{display:block;height:100%;background:#18181b}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.choice{border:2px solid transparent;background:#fafafa;border-radius:20px;padding:12px;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;visibility:visible!important;opacity:1!important}
+.choice:hover{border-color:#aaa}.choice canvas{width:100%;aspect-ratio:1;border-radius:14px;display:block}
+.name{font-size:20px;font-weight:700;padding:13px 4px 4px}
+.game-actions{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px}.start{text-align:center;padding:30px 10px}.start p{color:var(--muted);line-height:1.8}
+.primary{border:0;background:#18181b;color:#fff;border-radius:14px;padding:14px 28px;font-weight:700;cursor:pointer}
+.secondary{border:1px solid var(--line);background:#fff;color:#222;border-radius:14px;padding:12px 20px;font-weight:700;cursor:pointer}
+.secondary:disabled{opacity:.45;cursor:not-allowed}
+.result{text-align:center}.podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;align-items:end;gap:8px;margin:14px auto 16px;max-width:660px}
+.place{min-width:0}.place .photo{background:#fff;border-radius:18px;padding:8px;border:1px solid var(--line)}
+.place img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}.place .rank{font-size:24px;font-weight:900;margin:5px 0 1px}
+.place .nm{font-size:16px;font-weight:800;margin-bottom:4px}.place.first .rank{font-size:30px}.place.second,.place.third{padding-top:22px}
+.results-list{max-width:900px;margin:0 auto;text-align:left}.results-list h2{text-align:center;font-size:18px;margin:0 0 6px}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10px}
+.row{display:flex;align-items:center;gap:6px;padding:4px 4px;border-bottom:1px solid var(--line);min-width:0}
+.num{width:30px;flex-shrink:0;font-weight:800;color:var(--muted);font-size:12px}.thumb{width:30px;height:30px;object-fit:cover;border-radius:7px;flex-shrink:0}
+.rname{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:26px;flex-wrap:wrap}.note{font-size:12px;color:var(--muted);margin-top:18px}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.modal-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:18px}.modal textarea{width:100%;height:250px;padding:10px;border:1px solid var(--line);border-radius:10px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#18181b;color:#fff;padding:11px 16px;border-radius:12px;z-index:60}
+@media(max-width:640px){
+ .wrap{padding:16px 10px 36px}.panel{padding:14px}.choice-grid{gap:8px}.choice{padding:7px}.name{font-size:17px}
+ .podium{gap:4px;margin:8px auto 12px;max-width:560px}.place .rank{font-size:20px}.place.first .rank{font-size:25px}.place .nm{font-size:13px}.place.second,.place.third{padding-top:18px}
+ .results-grid{grid-template-columns:repeat(3,1fr);gap:0 3px}.row{gap:3px;padding:3px 1px}.num{width:24px;font-size:10px}.thumb{width:26px;height:26px}.rname{font-size:11px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header><h1>顔ランキング</h1><p class="sub">好きなほうを選んでください</p></header>
+<header><h1 id="mainTitle">キャストランキング</h1><p class="sub" id="mainSub">ランキングを選んでください</p></header>
 
 <section id="start" class="panel start">
-<h2>あなたの好みランキングを作ろう</h2>
-<p class="sub">15人の写真を2人ずつ比較して順位を作ります。</p>
-<button id="startBtn" class="primary">ランキングを始める</button>
-<div id="loading" class="loading hidden">15枚の写真を読み込み中…</div>
+<h2>ランキングを選んでください</h2>
+<p>作りたいランキングを選択してください。</p>
+<div class="actions" style="justify-content:center;margin-top:18px">
+<button class="primary modeBtn" data-mode="face">顔ランキング</button>
+<button class="secondary modeBtn" data-mode="talk">話しやすいキャストランキング</button>
+</div>
 </section>
 
 <section id="game" class="panel hidden">
-<div class="status"><span id="doneText">0回選択済み</span><span id="remainText"></span></div>
-<div class="bar"><div id="bar" style="width:0"></div></div>
-<div class="choices">
-<button id="left" class="choice"><canvas width="800" height="800"></canvas><div class="name"></div></button>
-<button id="right" class="choice"><canvas width="800" height="800"></canvas><div class="name"></div></button>
+<div class="progress"><span id="progressText"></span><span id="countText"></span></div>
+<div class="bar"><i id="bar" style="width:0"></i></div>
+<div class="choice-grid">
+<button class="choice" id="left"><canvas width="800" height="800"></canvas><div class="name"></div></button>
+<button class="choice" id="right"><canvas width="800" height="800"></canvas><div class="name"></div></button>
 </div>
-<div class="game-actions"><button id="undo" class="secondary" disabled>ひとつ前に戻る</button></div>
+<div class="game-actions"><button class="secondary" id="undoBtn" disabled>ひとつ前に戻る</button><span class="hint">写真をタップして選択</span></div>
 </section>
 
 <section id="result" class="panel result hidden">
-<h2>あなたのランキング</h2>
-<div id="podium" class="podium"></div>
-<h3 class="rest-title">4位以下</h3>
-<div id="list" class="results-grid"></div>
+<h2 id="resultTitle">あなたのランキング</h2><p class="sub">選んだ結果から順位を作成しました</p>
+<div class="podium" id="podium"></div>
+<div class="results-list"><h2>4位以下</h2><div id="list" class="results-grid"></div></div>
 <div class="actions">
-<button id="again" class="primary">もう一度やる</button>
-<button id="copy" class="secondary">結果をコピー</button>
-<button id="save" class="secondary">画像で保存</button>
+<button class="primary" id="againBtn">もう一度やる</button>
+<button class="secondary" id="copyBtn">結果をコピー</button>
+<button class="secondary" id="saveBtn">画像で保存</button>
 </div>
+<p class="note">※結果はこの端末のブラウザ内だけで処理されます。</p>
 </section>
 </div>
 
-<script>
-"use strict";
+<div id="copyModal" class="modal hidden"><div class="modal-card">
+<h3>ランキング結果</h3><textarea id="copyArea" readonly></textarea>
+<div class="modal-actions"><button class="secondary" id="closeModal">閉じる</button><button class="primary" id="manualCopy">コピーする</button></div>
+</div></div>
 
-/* ===== 人物データ ===== */
+<script>
 const PEOPLE=[
- ["はゆ","はゆ.PNG"],["のん","のん.PNG"],["みあ","みあ.PNG"],["しゅらん","しゅらん.PNG"],
- ["つき","つき.PNG"],["あまね","あまね.PNG"],["るる","るる.PNG"],["あむ","あむ.PNG"],
- ["ひめ","ひめ.PNG"],["ねむち","ねむち.PNG"],["なこ","なこ.PNG"],["りり","りり.PNG"],
- ["はお","はお.PNG"],["める","める.PNG"],["うに","うに.PNG"]
-].map(([name,file])=>({name,file}));
+{name:"はゆ",file:"はゆ.PNG"},{name:"のん",file:"のん.PNG"},{name:"みあ",file:"みあ.PNG"},{name:"しゅらん",file:"しゅらん.PNG"},
+{name:"つき",file:"つき.PNG"},{name:"あまね",file:"あまね.PNG"},{name:"るる",file:"るる.PNG"},{name:"あむ",file:"あむ.PNG"},
+{name:"ひめ",file:"ひめ.PNG"},{name:"ねむち",file:"ねむち.PNG"},{name:"なこ",file:"なこ.PNG"},{name:"りり",file:"りり.PNG"},
+{name:"はお",file:"はお.PNG"},{name:"める",file:"める.PNG"}];
 
 const $=id=>document.getElementById(id);
-const imageCache=new Map();
-let state=null;
-let history=[];
-let ranking=[];
+const start=$("start"),game=$("game"),result=$("result"),left=$("left"),right=$("right");
+let ranked=[], history=[], done=0, totalMax=0;
+let selectedMode="face";
+let runs=[], nextRuns=[], runIndex=0, leftRun=null, rightRun=null, i=0, j=0, merged=[], current=null;
 
-/* ===== 画像をゲーム開始前に全て読み込む ===== */
-async function preload(){
- if(imageCache.size===PEOPLE.length)return;
- await Promise.all(PEOPLE.map(p=>new Promise((resolve,reject)=>{
-   const im=new Image();
-   im.onload=async()=>{
-     try{if(im.decode)await im.decode()}catch(_){}
-     imageCache.set(p.name,im); resolve();
-   };
-   im.onerror=()=>reject(new Error(p.file));
-   im.src=encodeURI(p.file);
- })));
-}
-
-/* ===== シャッフル ===== */
-function shuffled(){
- const a=[...PEOPLE];
- for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
- return a;
-}
-
-/*
-  ===== ランキング方式 =====
-  bottom-up merge sort。
-  1クリックにつき state.clicks は必ず +1。
-  クリック以外の自動処理では clicks を変更しない。
-*/
-function freshState(){
+function cloneRuns(arr){return arr.map(r=>[...r])}
+function snapshot(){
  return {
-   runs:shuffled().map(p=>[p]),
-   nextRuns:[],
-   runPos:0,
-   leftRun:null,rightRun:null,
-   li:0,ri:0,
-   merged:[],
-   pair:null,
-   clicks:0
+  ranked:[...ranked],runs:cloneRuns(runs),nextRuns:cloneRuns(nextRuns),runIndex,
+  leftRun:leftRun?[...leftRun]:null,rightRun:rightRun?[...rightRun]:null,
+  i,j,merged:[...merged],current:current?{a:current.a,b:current.b}:null,done
  };
 }
-function cloneState(s){
- return {
-   runs:s.runs.map(x=>[...x]),nextRuns:s.nextRuns.map(x=>[...x]),runPos:s.runPos,
-   leftRun:s.leftRun?[...s.leftRun]:null,rightRun:s.rightRun?[...s.rightRun]:null,
-   li:s.li,ri:s.ri,merged:[...s.merged],
-   pair:s.pair?{left:s.pair.left,right:s.pair.right}:null,clicks:s.clicks
- };
+function restore(x){
+ ranked=[...x.ranked];runs=cloneRuns(x.runs);nextRuns=cloneRuns(x.nextRuns);runIndex=x.runIndex;
+ leftRun=x.leftRun?[...x.leftRun]:null;rightRun=x.rightRun?[...x.rightRun]:null;
+ i=x.i;j=x.j;merged=[...x.merged];current=x.current?{a:x.current.a,b:x.current.b}:null;done=x.done;
+ showPair();
 }
-
-/* 次に人間が選ぶ必要がある比較まで、自動処理だけ進める */
-function advance(){
+function drawChoice(btn,p){
+ const cv=btn.querySelector("canvas"),ctx=cv.getContext("2d"),im=imgCache.get(p.name);
+ if(!im||!im.complete||!im.naturalWidth)throw new Error("画像未準備: "+p.name);
+ ctx.clearRect(0,0,cv.width,cv.height);
+ const sw=im.naturalWidth,sh=im.naturalHeight,side=Math.min(sw,sh),sx=(sw-side)/2,sy=(sh-side)/2;
+ ctx.drawImage(im,sx,sy,side,side,0,0,cv.width,cv.height);
+ btn.querySelector(".name").textContent=p.name;
+ btn.dataset.person=p.name;
+}
+function remainingMax(){
+ // Merge sort of 14 people has a deterministic safe upper bound of n*ceil(log2(n)).
+ return Math.max(0,totalMax-done);
+}
+function updateUI(){
+ $("countText").textContent=`あと最大${remainingMax()}回`;
+ $("progressText").textContent=`${done}回選択済み`;
+ $("bar").style.width=Math.min(99,Math.round(done/Math.max(1,totalMax)*100))+"%";
+ $("undoBtn").disabled=!history.length;
+}
+function showPair(){
+ if(!current)return;
+ drawChoice(left,current.a);drawChoice(right,current.b);updateUI();
+}
+function prepareNextComparison(){
  while(true){
-   if(state.leftRun && state.rightRun){
-     if(state.li<state.leftRun.length && state.ri<state.rightRun.length){
-       state.pair={left:state.leftRun[state.li],right:state.rightRun[state.ri]};
-       renderPair();
-       return;
-     }
-     while(state.li<state.leftRun.length)state.merged.push(state.leftRun[state.li++]);
-     while(state.ri<state.rightRun.length)state.merged.push(state.rightRun[state.ri++]);
-     state.nextRuns.push([...state.merged]);
-     state.leftRun=null;state.rightRun=null;state.merged=[];state.li=0;state.ri=0;
-     continue;
+  if(leftRun && rightRun){
+   if(i<leftRun.length && j<rightRun.length){
+    current={a:leftRun[i],b:rightRun[j]};showPair();return;
    }
-
-   if(state.runPos<state.runs.length){
-     if(state.runPos===state.runs.length-1){
-       state.nextRuns.push([...state.runs[state.runPos++]]);
-       continue;
-     }
-     state.leftRun=state.runs[state.runPos++];
-     state.rightRun=state.runs[state.runPos++];
-     state.li=0;state.ri=0;state.merged=[];
-     continue;
-   }
-
-   if(state.nextRuns.length===1){
-     ranking=[...state.nextRuns[0]];
-     state.pair=null;
-     showResult();
-     return;
-   }
-
-   state.runs=state.nextRuns.map(x=>[...x]);
-   state.nextRuns=[];
-   state.runPos=0;
+   while(i<leftRun.length)merged.push(leftRun[i++]);
+   while(j<rightRun.length)merged.push(rightRun[j++]);
+   nextRuns.push([...merged]);
+   leftRun=rightRun=null;merged=[];i=j=0;
+  }
+  if(runIndex<runs.length){
+   if(runIndex===runs.length-1){nextRuns.push([...runs[runIndex]]);runIndex++;continue}
+   leftRun=runs[runIndex++];rightRun=runs[runIndex++];i=j=0;merged=[];continue;
+  }
+  if(nextRuns.length===1){
+   ranked=[...nextRuns[0]];current=null;finish();return;
+  }
+  runs=cloneRuns(nextRuns);nextRuns=[];runIndex=0;
  }
 }
-
-/* クリック処理。ここだけが clicks を増やす */
-function selectSide(side){
- if(!state || !state.pair)return;
- history.push(cloneState(state));
-
- if(side==="left"){
-   state.merged.push(state.leftRun[state.li]);
-   state.li++;
- }else{
-   state.merged.push(state.rightRun[state.ri]);
-   state.ri++;
- }
- state.clicks++;
- state.pair=null;
- advance();
-}
-
-/* ===== 比較画面描画 ===== */
-function drawPerson(button,p){
- const cv=button.querySelector("canvas"),ctx=cv.getContext("2d"),im=imageCache.get(p.name);
- ctx.clearRect(0,0,800,800);
- const side=Math.min(im.naturalWidth,im.naturalHeight);
- const sx=(im.naturalWidth-side)/2,sy=(im.naturalHeight-side)/2;
- ctx.drawImage(im,sx,sy,side,side,0,0,800,800);
- button.querySelector(".name").textContent=p.name;
-}
-function maxComparisons(n){
- let sizes=Array(n).fill(1), total=0;
- while(sizes.length>1){
-   const next=[];
-   for(let k=0;k<sizes.length;k+=2){
-     if(k+1>=sizes.length){next.push(sizes[k]);continue}
-     const a=sizes[k],b=sizes[k+1];
-     total+=a+b-1;
-     next.push(a+b);
-   }
-   sizes=next;
- }
- return total;
-}
-function renderPair(){
- const p=state.pair;
- drawPerson($("left"),p.left);
- drawPerson($("right"),p.right);
- $("doneText").textContent=state.clicks+"回選択済み";
- /* 14人のmerge sortの安全な最大比較数 */
- const max=54;
- $("remainText").textContent="あと最大"+Math.max(0,max-state.clicks)+"回";
- $("bar").style.width=Math.min(98,(state.clicks/max*100))+"%";
- $("undo").disabled=history.length===0;
-}
-
-/* ===== 戻る ===== */
-function undo(){
- if(!history.length)return;
- state=history.pop();
- $("result").classList.add("hidden");
- $("game").classList.remove("hidden");
- renderPair();
-}
-
-/* ===== 開始 ===== */
 async function startGame(){
- $("startBtn").disabled=true;$("loading").classList.remove("hidden");
+ start.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");
+ $("progressText").textContent="写真を準備中…";$("countText").textContent="";$("undoBtn").disabled=true;
  try{
-   await preload();
+  if(imgCache.size!==PEOPLE.length)await preloadAll();
  }catch(e){
-   alert("画像を読み込めませんでした: "+e.message);
-   $("startBtn").disabled=false;$("loading").classList.add("hidden");return;
+  alert("画像を読み込めませんでした: "+e.message);game.classList.add("hidden");start.classList.remove("hidden");return;
  }
- state=freshState();history=[];ranking=[];
- $("start").classList.add("hidden");$("result").classList.add("hidden");$("game").classList.remove("hidden");
- advance();
+ const order=shuffle(PEOPLE);
+ ranked=[];history=[];done=0;
+ runs=order.map(p=>[p]);nextRuns=[];runIndex=0;leftRun=rightRun=null;i=j=0;merged=[];current=null;
+ totalMax=PEOPLE.length*Math.ceil(Math.log2(PEOPLE.length));
+ prepareNextComparison();
 }
+let accepting=true;
+function choose(p){
+ if(!current||!accepting)return;
+ accepting=false;
+ const before=snapshot();
+ history.push(before);
+ // exactly one user choice = exactly one increment
+ if(p.name===current.a.name){merged.push(leftRun[i++])}
+ else if(p.name===current.b.name){merged.push(rightRun[j++])}
+ else {history.pop();accepting=true;return}
+ done++;
+ current=null;
+ prepareNextComparison();
+ accepting=true;
+}
+left.onclick=()=>{if(current)choose(current.a)};
+right.onclick=()=>{if(current)choose(current.b)};
+$("undoBtn").onclick=()=>{
+ if(!history.length)return;
+ accepting=false;
+ restore(history.pop());
+ accepting=true;
+};
 
-/* ===== 結果 ===== */
-function showResult(){
- $("game").classList.add("hidden");$("result").classList.remove("hidden");
- const podium=$("podium");podium.innerHTML="";
+function finish(){
+ game.classList.add("hidden");result.classList.remove("hidden");
+ const podium=$("podium"),list=$("list");podium.innerHTML="";list.innerHTML="";
  [[1,"second"],[0,"first"],[2,"third"]].forEach(([idx,cls])=>{
-   const p=ranking[idx],d=document.createElement("div");d.className="place "+cls;
-   d.innerHTML=`<div class="photo"><img src="${encodeURI(p.file)}"></div><div class="rank">${idx+1}位</div><div class="nm">${p.name}</div>`;
-   podium.appendChild(d);
+  const p=ranked[idx],el=document.createElement("div");el.className="place "+cls;
+  el.innerHTML=`<div class="photo"><img src="${path(p)}" alt="${p.name}"></div><div class="rank">${idx+1}位</div><div class="nm">${p.name}</div>`;podium.appendChild(el);
  });
- const list=$("list");list.innerHTML="";
- ranking.slice(3).forEach((p,i)=>{
-   const d=document.createElement("div");d.className="row";
-   d.innerHTML=`<span class="num">${i+4}位</span><img class="thumb" src="${encodeURI(p.file)}"><span class="rname">${p.name}</span>`;
-   list.appendChild(d);
+ ranked.slice(3).forEach((p,k)=>{
+  const el=document.createElement("div");el.className="row";
+  el.innerHTML=`<span class="num">${k+4}位</span><img class="thumb" src="${path(p)}" alt=""><span class="rname">${p.name}</span>`;list.appendChild(el);
  });
 }
-function resultText(){return "【顔ランキング】\n"+ranking.map((p,i)=>`${i+1}位 ${p.name}`).join("\n")}
-async function copyResult(){
- const t=resultText();
- try{await navigator.clipboard.writeText(t);toast("コピーしました")}
- catch(_){
-   const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();
-   document.execCommand("copy");ta.remove();toast("コピーしました");
+function rankingText(){return "【顔ランキング】\n"+ranked.map((p,i)=>`${i+1}位 ${p.name}`).join("\n")}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1600)}
+async function copyNow(text){
+ if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);return true}catch(e){}}
+ const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();
+ let ok=false;try{ok=document.execCommand("copy")}catch(e){}ta.remove();return ok;
+}
+$("copyBtn").onclick=async()=>{
+ const t=rankingText();if(await copyNow(t)){toast("コピーしました")}else{$("copyArea").value=t;$("copyModal").classList.remove("hidden");$("copyArea").select()}
+};
+$("manualCopy").onclick=async()=>{if(await copyNow($("copyArea").value)){$("copyModal").classList.add("hidden");toast("コピーしました")}else{$("copyArea").select()}};
+$("closeModal").onclick=()=>$("copyModal").classList.add("hidden");
+
+async function saveImage(){
+ const btn=$("saveBtn");
+ btn.disabled=true;
+ btn.textContent="画像を作成中…";
+ try{
+  const W=1080,H=1600,cv=document.createElement("canvas");
+  cv.width=W;cv.height=H;
+  const c=cv.getContext("2d");
+  if(!c) throw new Error("canvas");
+
+  // roundRect() 非対応ブラウザでも動く角丸パス
+  function rr(x,y,w,h,r){
+   r=Math.min(r,w/2,h/2);
+   c.beginPath();
+   c.moveTo(x+r,y);
+   c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+   c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+   c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+   c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y);
+   c.closePath();
+  }
+
+  // 保存用にも画像が完全に読み込み済みか確認
+  async function getReadyImage(p){
+   let im=imgCache.get(p.name);
+   if(im && im.complete && im.naturalWidth>0) return im;
+   im=new Image();
+   im.src=path(p);
+   if(im.decode){
+    await im.decode();
+   }else{
+    await new Promise((resolve,reject)=>{
+     im.onload=resolve; im.onerror=reject;
+    });
+   }
+   imgCache.set(p.name,im);
+   return im;
+  }
+
+  // 14枚全部の保存用画像を先に確定
+  await Promise.all(ranked.map(getReadyImage));
+
+  c.fillStyle="#f7f7f8";c.fillRect(0,0,W,H);
+  c.fillStyle="#18181b";c.textAlign="center";
+  c.font='bold 60px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+  c.fillText("あなたの顔ランキング",W/2,92);
+
+  async function drawCard(p,x,y,w,rank){
+   c.fillStyle="#fff";rr(x,y,w,w+95,22);c.fill();
+   const im=await getReadyImage(p);
+   c.save();rr(x+9,y+9,w-18,w-18,16);c.clip();
+   c.drawImage(im,x+9,y+9,w-18,w-18);c.restore();
+   c.fillStyle="#18181b";c.textAlign="center";
+   c.font='bold 31px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(rank+"位",x+w/2,y+w+43);
+   c.font='bold 27px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(p.name,x+w/2,y+w+78);
+  }
+
+  await drawCard(ranked[1],90,220,270,2);
+  await drawCard(ranked[0],405,175,270,1);
+  await drawCard(ranked[2],720,220,270,3);
+
+  c.fillStyle="#18181b";c.textAlign="left";
+  c.font='bold 34px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+  c.fillText("4位以下",70,745);
+
+  const rest=ranked.slice(3);
+  for(let i=0;i<rest.length;i++){
+   const p=rest[i],col=i%2,row=Math.floor(i/2);
+   const x=70+col*475,y=780+row*112;
+   c.fillStyle="#fff";rr(x,y,465,102,15);c.fill();
+   const im=await getReadyImage(p);
+   c.save();rr(x+10,y+9,84,84,11);c.clip();
+   c.drawImage(im,x+10,y+9,84,84);c.restore();
+   c.fillStyle="#71717a";c.textAlign="left";
+   c.font='bold 25px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText((i+4)+"位",x+110,y+42);
+   c.fillStyle="#18181b";
+   c.font='bold 29px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif';
+   c.fillText(p.name,x+110,y+78);
+  }
+
+  const blob=await new Promise((resolve,reject)=>{
+   try{cv.toBlob(b=>b?resolve(b):reject(new Error("blob")),"image/png")}
+   catch(e){reject(e)}
+  });
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="顔ランキング.png";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  toast("画像を保存しました");
+ }catch(e){
+  console.error("saveImage error:",e);
+  alert("画像の保存に失敗しました。ページを再読み込みして、もう一度お試しください。");
+ }finally{
+  btn.disabled=false;
+  btn.textContent="画像で保存";
  }
 }
-function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1400)}
-
-/* ===== 結果画像保存 ===== */
-function roundRect(ctx,x,y,w,h,r){
- ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
- ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
- ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
-}
-function cropDraw(ctx,im,x,y,w,h,r){
- ctx.save();roundRect(ctx,x,y,w,h,r);ctx.clip();
- const side=Math.min(im.naturalWidth,im.naturalHeight),sx=(im.naturalWidth-side)/2,sy=(im.naturalHeight-side)/2;
- ctx.drawImage(im,sx,sy,side,side,x,y,w,h);ctx.restore();
-}
-async function saveImage(){
- const btn=$("save");btn.disabled=true;btn.textContent="作成中…";
- try{
-   const cv=document.createElement("canvas");cv.width=1080;cv.height=1500;const c=cv.getContext("2d");
-   c.fillStyle="#f5f5f6";c.fillRect(0,0,1080,1500);
-   c.fillStyle="#171717";c.textAlign="center";c.font="700 54px sans-serif";c.fillText("あなたの顔ランキング",540,75);
-
-   const tops=[[ranking[1],85,180,275,2],[ranking[0],402,135,275,1],[ranking[2],720,180,275,3]];
-   for(const [p,x,y,w,r] of tops){
-     c.fillStyle="#fff";roundRect(c,x,y,w,w+90,20);c.fill();
-     cropDraw(c,imageCache.get(p.name),x+8,y+8,w-16,w-16,14);
-     c.fillStyle="#171717";c.font="700 30px sans-serif";c.fillText(r+"位",x+w/2,y+w+40);
-     c.font="700 25px sans-serif";c.fillText(p.name,x+w/2,y+w+73);
-   }
-
-   c.textAlign="left";c.font="700 30px sans-serif";c.fillText("4位以下",60,665);
-   ranking.slice(3).forEach((p,i)=>{
-     const col=i%2,row=Math.floor(i/2),x=60+col*490,y=700+row*105;
-     c.fillStyle="#fff";roundRect(c,x,y,470,92,14);c.fill();
-     cropDraw(c,imageCache.get(p.name),x+8,y+8,76,76,10);
-     c.fillStyle="#777";c.font="700 23px sans-serif";c.fillText((i+4)+"位",x+100,y+38);
-     c.fillStyle="#171717";c.font="700 27px sans-serif";c.fillText(p.name,x+100,y+70);
-   });
-
-   const blob=await new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error()),"image/png"));
-   const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="顔ランキング.png";a.click();
-   setTimeout(()=>URL.revokeObjectURL(u),2000);toast("画像を保存しました");
- }catch(e){console.error(e);alert("画像の保存に失敗しました。")}
- finally{btn.disabled=false;btn.textContent="画像で保存"}
-}
-
-/* ===== イベント ===== */
-$("startBtn").onclick=startGame;
-$("left").onclick=()=>selectSide("left");
-$("right").onclick=()=>selectSide("right");
-$("undo").onclick=undo;
-$("again").onclick=()=>{state=null;history=[];ranking=[];$("result").classList.add("hidden");$("start").classList.remove("hidden");$("startBtn").disabled=false;$("loading").classList.add("hidden")};
-$("copy").onclick=copyResult;
-$("save").onclick=saveImage;
+$("saveBtn").onclick=saveImage;document.querySelectorAll(".modeBtn").forEach(btn=>btn.onclick=()=>{
+ selectedMode=btn.dataset.mode;
+ const talk=selectedMode==="talk";
+ $("mainTitle").textContent=talk?"話しやすいキャストランキング":"顔ランキング";
+ $("mainSub").textContent=talk?"より話しやすいと思うキャストを選んでください":"好きなほうを選んでください";
+ $("resultTitle").textContent=talk?"あなたの話しやすいキャストランキング":"あなたの顔ランキング";
+ startGame();
+});$("againBtn").onclick=()=>{result.classList.add("hidden");start.classList.remove("hidden");$("mainTitle").textContent="キャストランキング";$("mainSub").textContent="ランキングを選んでください";};
 </script>
 </body>
 </html>
