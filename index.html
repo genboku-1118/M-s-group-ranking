@@ -101,27 +101,39 @@ let selectedMode="face";
 
 /* 画像は必要な2枚だけ待って同時表示。残りはバックグラウンドで先読みする */
 const imgCache=new Map();
-function path(p){ return encodeURI(p.file); }
+function path(p){ return p.file; }
 
 function loadImage(p){
-  const cached=imgCache.get(p.name);
-  if(cached?.complete && cached.naturalWidth) return Promise.resolve(cached);
-  return new Promise((resolve,reject)=>{
-    const im=cached || new Image();
-    imgCache.set(p.name,im);
-    if(!cached) im.src=path(p);
-    if(im.complete && im.naturalWidth){ resolve(im); return; }
-    im.onload=()=>resolve(im);
-    im.onerror=()=>reject(new Error("画像を読み込めませんでした: "+p.file));
-  });
-}
+  const ok=imgCache.get(p.file);
+  if(ok && ok.complete && ok.naturalWidth>0) return Promise.resolve(ok);
 
-function preloadBackground(){
-  PEOPLE.forEach(p=>{
-    if(imgCache.has(p.name)) return;
+  return new Promise((resolve,reject)=>{
     const im=new Image();
-    imgCache.set(p.name,im);
-    im.src=path(p);
+    let settled=false;
+
+    const timer=setTimeout(()=>{
+      if(settled)return;
+      settled=true;
+      im.onload=null; im.onerror=null;
+      reject(new Error(p.file+" の読み込みがタイムアウトしました"));
+    },8000);
+
+    im.onload=()=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      imgCache.set(p.file,im);
+      resolve(im);
+    };
+    im.onerror=()=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      reject(new Error(p.file+" が見つからないか、読み込めません"));
+    };
+
+    /* ハンドラ設定後にsrcを指定する */
+    im.src=p.file;
   });
 }
 
@@ -142,7 +154,7 @@ function restore(x){
  showPair();
 }
 function drawChoice(btn,p){
- const cv=btn.querySelector("canvas"),ctx=cv.getContext("2d"),im=imgCache.get(p.name);
+ const cv=btn.querySelector("canvas"),ctx=cv.getContext("2d"),im=imgCache.get(p.file);
  if(!im||!im.complete||!im.naturalWidth)throw new Error("画像未準備: "+p.name);
  ctx.clearRect(0,0,cv.width,cv.height);
  const sw=im.naturalWidth,sh=im.naturalHeight,side=Math.min(sw,sh),sx=(sw-side)/2,sy=(sh-side)/2;
@@ -177,10 +189,13 @@ async function showPair(){
    right.style.visibility="visible";
    left.disabled=false;
    right.disabled=false;
-   setTimeout(preloadBackground,0);
  }catch(e){
    console.error(e);
-   alert("画像を読み込めませんでした: "+e.message);
+   alert("画像を読み込めませんでした。\n"+e.message+"\n\n画像ファイル名とHTML内の名前が一致しているか確認してください。");
+   game.classList.add("hidden");
+   start.classList.remove("hidden");
+   $("mainTitle").textContent="キャストランキング";
+   $("mainSub").textContent="ランキングを選んでください";
  }
 }
 function prepareNextComparison(){
@@ -287,7 +302,7 @@ async function saveImage(){
 
   // 保存用にも画像が完全に読み込み済みか確認
   async function getReadyImage(p){
-   let im=imgCache.get(p.name);
+   let im=imgCache.get(p.file);
    if(im && im.complete && im.naturalWidth>0) return im;
    im=new Image();
    im.src=path(p);
